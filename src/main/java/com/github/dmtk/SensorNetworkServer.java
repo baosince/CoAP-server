@@ -36,6 +36,7 @@ public class SensorNetworkServer extends CoapServer implements Observer {
     private final int COAP_PORT = NetworkConfig.getStandard().getInt(NetworkConfig.Keys.COAP_PORT);
     private final ComPort port = new ComPort();
     private final ComPort port2 = new ComPort();
+    private final DS18B20 ds18b20 = DS18B20.getInstance();
     private final byte networkSize = 4;
     private final Map<Integer, SensorNode> nodes = new HashMap<>();
     private final Uart u;
@@ -62,6 +63,7 @@ public class SensorNetworkServer extends CoapServer implements Observer {
         addEndpoints();
         port.addObserver(this);
         port2.addObserver(this);
+        ds18b20.addObserver(this);
 
     }
 
@@ -82,14 +84,19 @@ public class SensorNetworkServer extends CoapServer implements Observer {
     @Override
     public void update(Observable o, Object arg) {
 
-        String line = ((ComPort) o).getData();
+        String line = ((HardwareInterface) o).getData();
 
         if (line.contains("AAAA")) {
             parseWSNMessage(line);
-        } else if (line.endsWith(">")) {
+        }else if (line.endsWith(">")) {
             parseXMLData(line);
+        }else{
+            double value = Double.parseDouble(line);
+            nodes.get(1).update(CentralSensorNodeResource.temperature_DS18B20, value);
         }
     }
+    
+    
 
     private void parseWSNMessage(String line) {
         u.update(line);

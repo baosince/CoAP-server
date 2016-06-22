@@ -8,7 +8,7 @@ import jssc.SerialPortException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public class ComPort extends Observable {
+public class ComPort extends Observable implements HardwareInterface{
 
     private SerialPort serialPort;
     private String data = "";
